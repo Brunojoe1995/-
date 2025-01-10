@@ -30,7 +30,6 @@ import org.gradle.api.internal.plugins.PluginManagerInternal;
 import org.gradle.api.internal.plugins.software.SoftwareType;
 import org.gradle.api.internal.tasks.properties.InspectionScheme;
 import org.gradle.api.internal.tasks.properties.InspectionSchemeFactory;
-import org.gradle.api.problems.internal.InternalProblems;
 import org.gradle.initialization.ClassLoaderScopeRegistry;
 import org.gradle.internal.Factory;
 import org.gradle.internal.build.BuildIncluder;
@@ -45,13 +44,13 @@ import org.gradle.internal.service.ServiceRegistration;
 import org.gradle.internal.service.ServiceRegistrationProvider;
 import org.gradle.internal.service.scopes.AbstractGradleModuleServices;
 import org.gradle.plugin.management.PluginManagementSpec;
+import org.gradle.plugin.management.internal.DefaultPluginHandler;
 import org.gradle.plugin.management.internal.DefaultPluginManagementSpec;
 import org.gradle.plugin.management.internal.DefaultPluginResolutionStrategy;
 import org.gradle.plugin.management.internal.PluginHandler;
 import org.gradle.plugin.management.internal.PluginResolutionStrategyInternal;
 import org.gradle.plugin.management.internal.autoapply.AutoAppliedPluginRegistry;
 import org.gradle.plugin.management.internal.autoapply.CompositeAutoAppliedPluginRegistry;
-import org.gradle.plugin.management.internal.DefaultPluginHandler;
 import org.gradle.plugin.management.internal.autoapply.InjectedAutoAppliedPluginRegistry;
 import org.gradle.plugin.software.internal.DefaultModelDefaultsApplicator;
 import org.gradle.plugin.software.internal.DefaultSoftwareFeatureApplicator;
@@ -66,6 +65,7 @@ import org.gradle.plugin.use.internal.DefaultPluginRequestApplicator;
 import org.gradle.plugin.use.internal.InjectedPluginClasspath;
 import org.gradle.plugin.use.internal.PluginDependencyResolutionServices;
 import org.gradle.plugin.use.internal.PluginRepositoryHandlerProvider;
+import org.gradle.plugin.use.internal.PluginRequestApplicator;
 import org.gradle.plugin.use.internal.PluginResolverFactory;
 import org.gradle.plugin.use.resolve.service.internal.ClientInjectedClasspathPluginResolver;
 import org.gradle.plugin.use.resolve.service.internal.DefaultInjectedClasspathPluginResolver;
@@ -123,7 +123,7 @@ public class PluginUseServices extends AbstractGradleModuleServices {
         @Provides
         void configure(ServiceRegistration registration) {
             registration.add(PluginResolverFactory.class);
-            registration.add(DefaultPluginRequestApplicator.class);
+            registration.add(PluginRequestApplicator.class, DefaultPluginRequestApplicator.class);
             registration.add(PluginVersionTracker.class);
         }
 
@@ -206,8 +206,8 @@ public class PluginUseServices extends AbstractGradleModuleServices {
     @NonNullApi
     private static class ProjectScopeServices implements ServiceRegistrationProvider {
         @Provides
-        SoftwareFeatureApplicator createSoftwareFeatureApplicator(ModelDefaultsApplicator modelDefaultsApplicator, PluginScheme pluginScheme, InternalProblems problems, PluginManagerInternal pluginManager) {
-            return new DefaultSoftwareFeatureApplicator(modelDefaultsApplicator, pluginScheme.getInspectionScheme(), problems, pluginManager);
+        SoftwareFeatureApplicator createSoftwareFeatureApplicator(ModelDefaultsApplicator modelDefaultsApplicator, PluginScheme pluginScheme, PluginManagerInternal pluginManager) {
+            return new DefaultSoftwareFeatureApplicator(modelDefaultsApplicator, pluginScheme.getInspectionScheme(), pluginManager);
         }
 
         @Provides

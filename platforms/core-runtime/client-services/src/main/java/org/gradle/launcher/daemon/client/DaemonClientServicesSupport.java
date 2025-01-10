@@ -17,6 +17,7 @@ package org.gradle.launcher.daemon.client;
 
 import org.gradle.api.internal.file.temp.TemporaryFileProvider;
 import org.gradle.cache.FileLockManager;
+import org.gradle.cache.GlobalCache;
 import org.gradle.cache.UnscopedCacheBuilderFactory;
 import org.gradle.cache.internal.CacheFactory;
 import org.gradle.cache.internal.DefaultCacheFactory;
@@ -50,7 +51,6 @@ import org.gradle.internal.time.Clock;
 import org.gradle.internal.time.Time;
 import org.gradle.launcher.daemon.configuration.DaemonParameters;
 import org.gradle.launcher.daemon.context.DaemonRequestContext;
-import org.gradle.launcher.daemon.protocol.DaemonMessageSerializer;
 import org.gradle.launcher.daemon.registry.DaemonDir;
 import org.gradle.launcher.daemon.registry.DaemonRegistry;
 import org.gradle.launcher.daemon.toolchain.DaemonJavaToolchainQueryService;
@@ -58,6 +58,8 @@ import org.gradle.process.internal.ClientExecHandleBuilderFactory;
 
 import java.io.InputStream;
 import java.util.UUID;
+
+import static org.gradle.launcher.daemon.client.DaemonClientMessageServices.getDaemonConnector;
 
 /**
  * Some support wiring for daemon clients.
@@ -89,7 +91,7 @@ public abstract class DaemonClientServicesSupport implements ServiceRegistration
         return new DefaultUnscopedCacheBuilderFactory(cacheFactory);
     }
 
-    @Provides
+    @Provides({GlobalScopedCacheBuilderFactory.class, GlobalCache.class})
     DefaultGlobalScopedCacheBuilderFactory createGlobalScopedCache(GlobalCacheDir globalCacheDir, UnscopedCacheBuilderFactory unscopedCacheBuilderFactory) {
         return new DefaultGlobalScopedCacheBuilderFactory(globalCacheDir.getDir(), unscopedCacheBuilderFactory);
     }
@@ -135,8 +137,16 @@ public abstract class DaemonClientServicesSupport implements ServiceRegistration
     }
 
     @Provides
-    DaemonConnector createDaemonConnector(DaemonDir daemonDir, DaemonRegistry daemonRegistry, OutgoingConnector outgoingConnector, DaemonStarter daemonStarter, ListenerManager listenerManager, ProgressLoggerFactory progressLoggerFactory, Serializer<BuildAction> buildActionSerializer) {
-        return new DefaultDaemonConnector(daemonDir, daemonRegistry, outgoingConnector, daemonStarter, listenerManager.getBroadcaster(DaemonStartListener.class), progressLoggerFactory, DaemonMessageSerializer.create(buildActionSerializer));
+    DaemonConnector createDaemonConnector(
+        DaemonDir daemonDir,
+        DaemonRegistry daemonRegistry,
+        OutgoingConnector outgoingConnector,
+        DaemonStarter daemonStarter,
+        ListenerManager listenerManager,
+        ProgressLoggerFactory progressLoggerFactory,
+        Serializer<BuildAction> buildActionSerializer
+    ) {
+        return getDaemonConnector(daemonDir, daemonRegistry, outgoingConnector, daemonStarter, listenerManager, progressLoggerFactory, buildActionSerializer);
     }
 
     @Provides

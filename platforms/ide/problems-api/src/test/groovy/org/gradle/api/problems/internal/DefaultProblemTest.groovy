@@ -16,9 +16,10 @@
 
 package org.gradle.api.problems.internal
 
-
+import org.gradle.api.problems.AdditionalData
+import org.gradle.api.problems.ProblemGroup
+import org.gradle.api.problems.ProblemId
 import org.gradle.api.problems.Severity
-import org.gradle.api.problems.SharedProblemGroup
 import org.gradle.internal.deprecation.Documentation
 import org.gradle.internal.operations.CurrentBuildOperationRef
 import org.gradle.internal.operations.OperationIdentifier
@@ -70,7 +71,7 @@ class DefaultProblemTest extends Specification {
     def "unbound builder result with a change and check report"() {
         given:
         def emitter = Mock(ProblemSummarizer)
-        def problemReporter = new DefaultProblemReporter(emitter, null, CurrentBuildOperationRef.instance(), new AdditionalDataBuilderFactory(), new ExceptionProblemRegistry(), null)
+        def problemReporter = new DefaultProblemReporter(emitter, null, CurrentBuildOperationRef.instance(), new ExceptionProblemRegistry(), null)
         def problem = createTestProblem(Severity.WARNING)
         def builder = problem.toBuilder()
         def newProblem = builder
@@ -99,7 +100,7 @@ class DefaultProblemTest extends Specification {
     private static createTestProblem(Severity severity = Severity.ERROR, AdditionalData additionalData = null) {
         new DefaultProblem(
             new DefaultProblemDefinition(
-                new DefaultProblemId('message', "displayName", SharedProblemGroup.generic()),
+                ProblemId.create('message', "displayName", ProblemGroup.create("generic", "Generic")),
                 severity,
                 Documentation.userManual('id'),
             ),
@@ -117,7 +118,7 @@ class DefaultProblemTest extends Specification {
         given:
         def problem = new DefaultProblem(
             new DefaultProblemDefinition(
-                new DefaultProblemId('message', "displayName", SharedProblemGroup.generic()),
+                ProblemId.create('message', "displayName", ProblemGroup.create("generic", "Generic")),
                 Severity.WARNING,
                 Documentation.userManual('id'),
             ),

@@ -18,11 +18,9 @@ package org.gradle.internal.reflect;
 
 import com.google.common.collect.ImmutableList;
 import org.gradle.api.InvalidUserDataException;
+import org.gradle.api.problems.Problem;
 import org.gradle.api.problems.ProblemId;
-import org.gradle.api.problems.internal.DefaultProblemId;
 import org.gradle.api.problems.internal.GradleCoreProblemGroup;
-import org.gradle.api.problems.internal.InternalProblems;
-import org.gradle.api.problems.internal.Problem;
 import org.gradle.internal.exceptions.DefaultMultiCauseException;
 import org.gradle.internal.reflect.validation.TypeValidationProblemRenderer;
 import org.gradle.model.internal.type.ModelType;
@@ -37,20 +35,20 @@ public class DefaultTypeValidationContext extends ProblemRecordingTypeValidation
     private final boolean reportCacheabilityProblems;
     private final ImmutableList.Builder<Problem> problems = ImmutableList.builder();
 
-    public static DefaultTypeValidationContext withRootType(Class<?> rootType, boolean cacheable, InternalProblems problems) {
-        return new DefaultTypeValidationContext(rootType, cacheable, problems);
+    public static DefaultTypeValidationContext withRootType(Class<?> rootType, boolean cacheable) {
+        return new DefaultTypeValidationContext(rootType, cacheable);
     }
 
-    public static DefaultTypeValidationContext withoutRootType(boolean reportCacheabilityProblems, InternalProblems problems) {
-        return new DefaultTypeValidationContext(null, reportCacheabilityProblems, problems);
+    public static DefaultTypeValidationContext withoutRootType(boolean reportCacheabilityProblems) {
+        return new DefaultTypeValidationContext(null, reportCacheabilityProblems);
     }
 
-    private DefaultTypeValidationContext(@Nullable Class<?> rootType, boolean reportCacheabilityProblems, InternalProblems problems) {
-        super(rootType, Optional::empty, problems);
+    private DefaultTypeValidationContext(@Nullable Class<?> rootType, boolean reportCacheabilityProblems) {
+        super(rootType, Optional::empty);
         this.reportCacheabilityProblems = reportCacheabilityProblems;
     }
 
-    public static final ProblemId MISSING_NORMALIZATION_ID = new DefaultProblemId("missing-normalization-annotation", "Missing normalization", GradleCoreProblemGroup.validation().property());
+    public static final ProblemId MISSING_NORMALIZATION_ID = ProblemId.create("missing-normalization-annotation", "Missing normalization", GradleCoreProblemGroup.validation().property());
 
     public static boolean onlyAffectsCacheableWork(ProblemId id) {
         return MISSING_NORMALIZATION_ID.equals(id);

@@ -20,10 +20,10 @@ import com.google.common.collect.ImmutableList;
 import org.gradle.api.internal.catalog.problems.ResolutionFailureProblemId;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
+import org.gradle.api.problems.internal.DefaultResolutionFailureData;
+import org.gradle.api.problems.Problem;
 import org.gradle.api.problems.internal.GradleCoreProblemGroup;
 import org.gradle.api.problems.internal.InternalProblems;
-import org.gradle.api.problems.internal.Problem;
-import org.gradle.api.problems.internal.ResolutionFailureDataSpec;
 import org.gradle.internal.component.resolution.failure.ReportableAsProblem;
 import org.gradle.internal.component.resolution.failure.ResolutionFailureHandler;
 import org.gradle.internal.component.resolution.failure.interfaces.ResolutionFailure;
@@ -77,13 +77,13 @@ public abstract class AbstractResolutionFailureException extends StyledException
 
     @Override
     public AbstractResolutionFailureException reportAsProblem(InternalProblems problemsService) {
-        Problem problem = problemsService.getInternalReporter().create(builder -> {
+        Problem problem = problemsService.getInternalReporter().internalCreate(builder -> {
             ResolutionFailureProblemId problemId = getFailure().getProblemId();
             builder.id(TextUtil.screamingSnakeToKebabCase(problemId.name()), problemId.getDisplayName(), GradleCoreProblemGroup.variantResolution())
                 .contextualLabel(getMessage())
                 .documentedAt(userManual("variant_model", "sec:variant-select-errors"))
                 .severity(ERROR)
-                .additionalData(ResolutionFailureDataSpec.class, data -> data.from(getFailure()));
+                .additionalData(new DefaultResolutionFailureData(getFailure()));
         });
         problemsService.getInternalReporter().report(problem);
 
