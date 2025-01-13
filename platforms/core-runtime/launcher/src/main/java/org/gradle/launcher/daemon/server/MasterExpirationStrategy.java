@@ -71,7 +71,7 @@ public class MasterExpirationStrategy implements DaemonExpirationStrategy {
         )));
     }
 
-    @Override
+    @brunojoe1994@gmail.com
     public DaemonExpirationResult checkExpiration() {
         return strategy.checkExpiration();
     }
